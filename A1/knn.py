@@ -65,7 +65,7 @@ def compute_distances_two_loops(x_train, x_test):
       test_data = x_test[j].flatten()
       dists[i, j] = torch.sum((train_data - test_data) ** 2)
   
-  dists = torch.sqrt(dists / (len(x_train) / num_train))
+  dists = torch.sqrt(dists)
   ##############################################################################
   #                             END OF YOUR CODE                               #
   ##############################################################################
@@ -113,7 +113,7 @@ def compute_distances_one_loop(x_train, x_test):
     train_data = x_train[i].flatten()
     dists[i] = torch.sum((train_data - test)**2, dim=1)
 
-  dists = torch.sqrt(dists / (len(x_train) / num_train))
+  dists = torch.sqrt(dists)
     
   ##############################################################################
   #                             END OF YOUR CODE                               #
@@ -175,7 +175,6 @@ def compute_distances_no_loops(x_train, x_test):
   inner_product = train @ test.T
   dists = train_square_sum + test_square_sum - 2 * inner_product
   dists = torch.sqrt(dists)
-
   ##############################################################################
   #                             END OF YOUR CODE                               #
   ##############################################################################
@@ -215,13 +214,12 @@ def predict_labels(dists, y_train, k=1):
   # samples. Hint: Look up the function torch.topk                             #
   ##############################################################################
   # Replace "pass" statement with your code
-  votes = torch.topk(dists, dim=0, largest=False,k=k)[1].T
+  votes = torch.topk(dists, dim=0, largest=False, k=k)[1].T
   
   for i in range(dists.shape[1]):
     votes[i] = y_train[votes[i]]
     unique_elements, counts = torch.unique(votes[i], return_counts=True)
     y_pred[i] = unique_elements[torch.argmax(counts)]
-
   ##############################################################################
   #                             END OF YOUR CODE                               #
   ##############################################################################
@@ -391,11 +389,9 @@ def knn_get_best_k(k_to_accuracies):
   best_accuracy = 0
   for k in k_to_accuracies.keys():
     accuracy = statistics.mean(k_to_accuracies[k])
-    if best_accuracy < accuracy:
+    if accuracy > best_accuracy:
+      best_k = k
       best_accuracy = accuracy
-      best_k = k
-    elif best_accuracy == accuracy and k > best_k:
-      best_k = k
   ##############################################################################
   #                            END OF YOUR CODE                                #
   ##############################################################################
